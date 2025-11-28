@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Ritualia Store</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      /* style */
+      body {
+        margin: 0;
+        background: url("/mnt/data/fondo.jpg") no-repeat center/cover fixed;
+        font-family: Arial, sans-serif;
+        color: #fff;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 20px;
+        background: rgba(0, 0, 0, 0.6);
+        position: sticky;
+        top: 0;
+      }
+
+      .btn {
+        background: #c62828;
+        border: none;
+        padding: 8px 13px;
+        color: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      input {
+        padding: 6px;
+        border-radius: 5px;
+        border: none;
+      }
+
+      /* inicio de sesion */
+      #login-area input {
+        margin-right: 5px;
+      }
+
+      /* carrusel */
+      .carousel {
+        width: 100%;
+        max-width: 1000px;
+        margin: 20px auto 0;
+        position: relative;
+        overflow: hidden;
+        border-radius: 10px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .carousel-track {
+        display: flex;
+        transition: 0.6s ease-in-out;
+      }
+
+      .slide {
+        min-width: 100%;
+        position: relative;
+      }
+
+      .slide img {
+        width: 100%;
+        height: 500px;
+        object-fit: cover;
+      }
+
+      .slide .caption {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 10px;
+        border-radius: 8px;
+      }
+
+      .carousel-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.5);
+        padding: 10px;
+        border: none;
+        cursor: pointer;
+        color: #fff;
+      }
+
+      #prev {
+        left: 10px;
+      }
+
+      #next {
+        right: 10px;
+      }
+
+      /* historial */
+      #historial {
+        margin: 30px auto;
+        max-width: 900px;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 15px;
+        border-radius: 8px;
+      }
+
+      .hist-item {
+        padding: 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      /* productos */
+      #productos {
+        max-width: 1000px;
+        margin: 10px auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 15px;
+      }
+
+      .card {
+        background: rgba(0, 0, 0, 0.6);
+        border-radius: 8px;
+        padding: 10px;
+        text-align: center;
+      }
+
+      .card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+      }
+
+      .card button {
+        margin-top: 10px;
+      }
+
+      /* --- TICKET --- */
+      #ticket {
+        background: rgba(0, 0, 0, 0.7);
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        width: 320px;
+        max-height: 75vh;
+        overflow-y: auto;
+        padding: 15px;
+        border-radius: 10px;
+      }
+
+      .ticket-item {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 10px 0;
+      }
+
+      /* --- PRINT --- */
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+
+        #printable,
+        #printable * {
+          visibility: visible;
+        }
+
+        #printable {
+          position: absolute;
+          top: 0;
+          left: 0;
+          background: #fff;
+          color: #000;
+          padding: 20px;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div style="display: flex; align-items: center; gap: 10px">
+        <img
+          src="logo.png"
+          alt="logo ritualia"
+          style="
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 5px;
+          "
+        />
+        <strong>RITUALIA</strong>
+      </div>
+
+      <div id="login-area">
+        <input type="text" id="name" placeholder="Nombre" />
+        <input type="email" id="email" placeholder="Email" />
+        <button class="btn" id="login-btn">Entrar</button>
+        <span id="user-info" style="display: none">
+          Hola, <span id="username"></span>
+        </span>
+      </div>
+    </header>
+
+    <div class="carousel">
+      <div class="carousel-track" id="track"></div>
+
+      <button id="prev" class="carousel-btn">‹</button>
+      <button id="next" class="carousel-btn">›</button>
+    </div>
+
+    <div id="historial">
+      <h2>Historial de productos seleccionados</h2>
+      <div id="historial-list"></div>
+    </div>
+
+    <div id="productos"></div>
+
+    <div id="ticket">
+      <h3>Ticket</h3>
+      <div id="ticket-items"></div>
+      <p><strong>Total:</strong> <span id="total">$0</span></p>
+
+      <p>
+        <label for="metodoDePago"><strong>Método de pago:</strong></label
+        ><br />
+        <select id="metodoDePago" aria-label="Método de pago">
+          <option value="">-- Seleccione --</option>
+          <option value="efectivo">Efectivo</option>
+          <option value="tarjeta">Tarjeta</option>
+          <option value="mercadopago">MercadoPago</option>
+          <option value="transferencia">Transferencia</option>
+        </select>
+      </p>
+
+      <p>
+        <strong>Método seleccionado:</strong> <span id="pagoTicket">—</span>
+      </p>
+
+      <button class="btn" id="finalizar">Finalizar Compra</button>
+    </div>
+
+    <div id="printable" style="display: none"></div>
+
+    <script>
+      class Producto {
+        constructor(id, nombre, precio, img) {
+          this.id = id;
+          this.nombre = nombre;
+          this.precio = precio;
+          this.img = img;
+        }
+
+        get datos() {
+          return {
+            id: this.id,
+            nombre: this.nombre,
+            precio: this.precio,
+            img: this.img,
+          };
+        }
+
+        set cambiarNombre(nuevo) {
+          this.nombre = nuevo;
+        }
+
+        set cambiarPrecio(nuevo) {
+          this.precio = nuevo;
+        }
+      }
+
+      class Usuario {
+        constructor() {
+          this.nombre = "";
+          this.email = "";
+        }
+
+        login(n, e) {
+          this.nombre = n;
+          this.email = e;
+        }
+      }
+
+      class Carrito {
+        constructor() {
+          this.items = [];
+        }
+
+        agregar(producto) {
+          let existe = this.items.find((p) => p.id === producto.id);
+
+          if (existe) {
+            existe.qty = existe.qty + 1;
+          } else {
+            this.items.push({
+              id: producto.id,
+              nombre: producto.nombre,
+              precio: producto.precio,
+              qty: 1,
+            });
+          }
+        }
+
+        quitar(id) {
+          this.items = this.items.filter((p) => p.id !== id);
+        }
+
+        total() {
+          let suma = 0;
+          this.items.forEach((p) => {
+            suma += p.precio * p.qty;
+          });
+          return suma;
+        }
+      }
+
+      class Historial {
+        constructor() {
+          this.lista = [];
+        }
+
+        agregar(producto) {
+          this.lista.unshift({
+            nombre: producto.nombre,
+            precio: producto.precio,
+          });
+
+          if (this.lista.length > 10) {
+            this.lista.pop();
+          }
+        }
+      }
+
+      let usuario = new Usuario();
+      let carrito = new Carrito();
+      let historial = new Historial();
+
+      let catalogo = [
+        new Producto(
+          "p1",
+          "Guns N’ Roses – Appetite for Destruction (Vinilo)",
+          45000,
+          "vinilo.webp"
+        ),
+        new Producto("p2", "AC/DC – Back in Black (CD)", 18000, "cd.png"),
+        new Producto(
+          "p3",
+          "Gibson Les Paul Bass (Vintage)",
+          950000,
+          "bajo.jpg"
+        ),
+      ];
+
+      let indice = 0;
+
+      function mostrarSlide(n) {
+        let track = document.getElementById("track");
+        indice = n;
+        track.style.transform = "translateX(-" + indice * 100 + "%)";
+      }
+
+      document.getElementById("next").onclick = () => {
+        indice = (indice + 1) % catalogo.length;
+        mostrarSlide(indice);
+      };
+
+      document.getElementById("prev").onclick = () => {
+        indice = (indice - 1 + catalogo.length) % catalogo.length;
+        mostrarSlide(indice);
+      };
+
+      function mostrarCarrusel() {
+        let track = document.getElementById("track");
+        track.innerHTML = "";
+
+        catalogo.forEach((p) => {
+          let d = document.createElement("div");
+          d.className = "slide";
+
+          d.innerHTML = `
+            <img src="${p.img}" alt="${p.nombre}">
+            <div class="caption">
+              <h3>${p.nombre}</h3>
+              <p>$${p.precio}</p>
+              <button class="btn buy-btn" data-id="${p.id}">COMPRAR</button>
+            </div>
+          `;
+
+          track.appendChild(d);
+        });
+      }
+
+      mostrarCarrusel();
+
+      document.getElementById("login-btn").onclick = () => {
+        let n = document.getElementById("name").value;
+        let e = document.getElementById("email").value;
+
+        if (n === "" || e === "") {
+          alert("Completa los datos");
+          return;
+        }
+
+        usuario.login(n, e);
+        document.getElementById("user-info").style.display = "inline";
+        document.getElementById("username").innerText = n;
+      };
+
+      function buscarProducto(id) {
+        return catalogo.find((p) => p.id === id);
+      }
+
+      document.getElementById("track").onclick = (e) => {
+        if (e.target.classList.contains("buy-btn")) {
+          let id = e.target.getAttribute("data-id");
+          let producto = buscarProducto(id);
+
+          carrito.agregar(producto);
+          historial.agregar(producto);
+
+          mostrarTicket();
+          mostrarHistorial();
+        }
+      };
+
+      function mostrarHistorial() {
+        let h = document.getElementById("historial-list");
+        h.innerHTML = "";
+
+        historial.lista.forEach((item) => {
+          let d = document.createElement("div");
+          d.className = "hist-item";
+          d.textContent = `${item.nombre} — $${item.precio}`;
+          h.appendChild(d);
+        });
+      }
+
+      function mostrarTicket() {
+        let t = document.getElementById("ticket-items");
+        t.innerHTML = "";
+
+        carrito.items.forEach((it) => {
+          let div = document.createElement("div");
+          div.className = "ticket-item";
+
+          div.innerHTML = `
+            ${it.nombre} x${it.qty} — $${it.precio * it.qty}
+            <button class="btn quitar" data-id="${it.id}">X</button>
+          `;
+
+          t.appendChild(div);
+        });
+
+        document.getElementById("total").innerText = "$" + carrito.total();
+      }
+
+      document.getElementById("ticket-items").onclick = (e) => {
+        if (e.target.classList.contains("quitar")) {
+          let id = e.target.getAttribute("data-id");
+          carrito.quitar(id);
+          mostrarTicket();
+        }
+      };
+
+      document.getElementById("finalizar").onclick = () => {
+        if (usuario.nombre === "") {
+          alert("Inicia sesión");
+          return;
+        }
+
+        if (carrito.items.length === 0) {
+          alert("Carrito vacío");
+          return;
+        }
+
+        alert("Compra realizada con éxito");
+      };
+
+      mostrarHistorial();
+      mostrarTicket();
+    </script>
+  </body>
+</html>
